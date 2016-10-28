@@ -18,7 +18,7 @@ querydb <- function(sqlComm, db="bia", user="biread", password="biread", forceJD
     ann <- fetch(rs, n=-1)
   }
   dbClearResult(rs)
-  dbDisconnect(con)
+  # dbDisconnect(con)
   ann
 }
 
@@ -51,7 +51,7 @@ querydbSelectIn <- function(sqlComm, inCol, inValues,
       dbClearResult(rs)
       res[[i]] <- ann
     }
-    dbDisconnect(con)
+    # dbDisconnect(con)
     do.call(rbind, res)
   }
 }
@@ -74,7 +74,9 @@ fillOneColTmpTbl <- function(con,  values) {
     inputDf <- data.frame(ID = values)
     state2 <- paste("insert into", RIBIOS_TMP_TBL, "(ID) values (:1)")
     rs <- dbSendQuery(con, state2, data = inputDf)
-    return(dbHasCompleted(rs))
+    status <- dbHasCompleted(rs)
+    dbClearResult(rs)
+    return(status)
   } else {
     if(!dbExistsTable(con, RIBIOS_JDBC_TMP_TBL)) {
       state <- paste("CREATE GLOBAL TEMPORARY TABLE", RIBIOS_JDBC_TMP_TBL, 
@@ -85,6 +87,19 @@ fillOneColTmpTbl <- function(con,  values) {
     ## TODO: SLOW: batch insert is desired
     for(i in seq(along=values))
       rs <- RJDBC::dbSendUpdate(con, state2, values[i])
+    return(TRUE)
+  }
+}
+
+dropTmpTable <- function(con) {
+  isORA <- inherits(con, "OraConnection")
+  if(isORA) {
+    rs = dbSendQuery(con, paste("DROP TABLE", RIBIOS_TMP_TBL))
+    status = dbHasCompleted(rs)
+    dbClearResult(rs)
+    return(status)
+  } else {
+    dbSendUpdate(paste("DROP TABLE", RIBIOS_JBDC_TMP_TBL))
     return(TRUE)
   }
 }
@@ -119,7 +134,8 @@ querydbTmpTbl <- function(sqlComm, inCol, inValues,
     ann <- fetch(rs, n=-1)
   }
   dbClearResult(rs)
-  dbDisconnect(con)
+  dropTmpTable(con)
+  # dbDisconnect(con)
   ann
 }
 

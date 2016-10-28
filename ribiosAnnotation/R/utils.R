@@ -25,6 +25,7 @@ ORACLE.HOME <- "/opt/oracle/client/10/run_1"
 ## maximum vector length in the IN syntax
 #' @export ORACLE.IN.NMAX
 ORACLE.IN.NMAX <- 1000L
+.conEnv = new.env()
 
 
 ## function to test whether Oracle is available
@@ -53,14 +54,21 @@ hasOracle <- function() {
   } else {
     ## require(RJDBC)
   }
+  con = ribiosCon(db="bin", user=ORACLE.BIN.USER, password=ORACLE.BIN.PWD)
+  assign("ORACLE.BIN.CON", con, envir=.conEnv)
 }
 
 ## automatically establish a connection, depending on whether Oracle client is installed
 #' @export ribiosCon
 ribiosCon <- function(db="bia", user="biread", password="biread", forceJDBC=FALSE) {
-  if(hasOracle() & !forceJDBC) {
+  if(db == "bin" && exists("ORACLE.BIN.CON", envir=.conEnv)) {
+      print(sprintf("Using estabilshed database connection to %s", db))
+      return(get("ORACLE.BIN.CON", envir=.conEnv))
+  } else if(hasOracle() & !forceJDBC) {
+    print(sprintf("Estabilshing ROracle connection to %s", db))
     con <- dbConnect(ORA, user = user, password = password, db = db)
   } else {
+    print(sprintf("Estabilshin RJDBC connection to %s", db))
     options(java.parameters = "-Xmx4g" ) ## increase the heap size before the RJDBC package is loaded
     suppressWarnings(suppressMessages(hasJDBC <- requireNamespace("RJDBC")))
     if(!hasJDBC)
