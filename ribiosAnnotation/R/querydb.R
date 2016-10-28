@@ -71,12 +71,14 @@ fillOneColTmpTbl <- function(con,  values) {
                      "(ID VARCHAR2(100) NOT NULl PRIMARY KEY) ON COMMIT DELETE ROWS")
       rs <- dbSendQuery(con, state)
     }
-    inputDf <- data.frame(ID = values)
-    state2 <- paste("insert into", RIBIOS_TMP_TBL, "(ID) values (:1)")
-    rs <- dbSendQuery(con, state2, data = inputDf)
-    status <- dbHasCompleted(rs)
-    dbClearResult(rs)
-    return(status)
+    if(length(values) > 0) {
+      inputDf <- data.frame(ID = values)
+      state2 <- paste("insert into", RIBIOS_TMP_TBL, "(ID) values (:1)")
+      rs <- dbSendQuery(con, state2, data = inputDf)
+      status <- dbHasCompleted(rs)
+      dbClearResult(rs)
+      return(status)
+    }
   } else {
     if(!dbExistsTable(con, RIBIOS_JDBC_TMP_TBL)) {
       state <- paste("CREATE GLOBAL TEMPORARY TABLE", RIBIOS_JDBC_TMP_TBL, 
@@ -87,21 +89,25 @@ fillOneColTmpTbl <- function(con,  values) {
     ## TODO: SLOW: batch insert is desired
     for(i in seq(along=values))
       rs <- RJDBC::dbSendUpdate(con, state2, values[i])
-    return(TRUE)
   }
+  return(TRUE)
 }
 
-dropTmpTable <- function(con) {
+truncateTmpTable <- function(con) {
   isORA <- inherits(con, "OraConnection")
   if(isORA) {
-    rs = dbSendQuery(con, paste("DROP TABLE", RIBIOS_TMP_TBL))
-    status = dbHasCompleted(rs)
-    dbClearResult(rs)
-    return(status)
+    if(dbExistsTable(con, RIBIOS_TMP_TBL)) {
+      rs = dbSendQuery(con, paste("TRUNCATE TABLE", RIBIOS_TMP_TBL))
+      status = dbHasCompleted(rs)
+      dbClearResult(rs)
+      return(status)
+    }
   } else {
-    dbSendUpdate(paste("DROP TABLE", RIBIOS_JBDC_TMP_TBL))
-    return(TRUE)
+    if(dbExistsTable(con, RIBIOS_JDBC_TMP_TBL)) {
+      RJDBC::dbSendUpdate(con, paste("TRUNCATE TABLE", RIBIOS_JDBC_TMP_TBL))
+    }
   }
+  return(TRUE)
 }
 
 ## querydbTmpTbl shows principles of using temporary table. The SQL building is not finished: currently it only supports WHERE-free syntax
@@ -134,7 +140,7 @@ querydbTmpTbl <- function(sqlComm, inCol, inValues,
     ann <- fetch(rs, n=-1)
   }
   dbClearResult(rs)
-  dropTmpTable(con)
+  truncateTmpTable(con)
   # dbDisconnect(con)
   ann
 }
