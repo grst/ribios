@@ -2,12 +2,12 @@ R=R
 
 full-install: reqR req install
 
-install: install-ribiosUtils install-ribiosArg install-ribiosIO install-ribiosDemo install-ribiosAuth install-ribiosUDIS install-ribiosBioQC install-ribiosPlot install-ribiosAnnotation install-ribiosCGI install-ribiosExpression install-ribiosMath  install-ribiosPCA install-ribiosReposition install-ribiosSeq install-ribiosNetwork install-ribiosQC install-ribiosGSA install-ribiosGSEA install-ribiosNGS 
+install: install-ribiosUtils install-ribiosArg install-ribiosIO install-ribiosDemo install-ribiosAuth install-ribiosUDIS install-ribiosPlot install-ribiosAnnotation install-ribiosCGI install-ribiosExpression install-ribiosMath  install-ribiosPCA install-ribiosReposition install-ribiosSeq install-ribiosNetwork install-ribiosQC install-ribiosGSA install-ribiosGSEA install-ribiosNGS 
 
 reqs: reqR reqBioc
 
 reqR:
-	${R} -e "install.package(c('rrcov'))"
+	${R} -e "install.packages(c('rrcov'))"
 
 reqBioc:
 	${R} -e "library(BiocInstaller); biocLite(c('Biobase', 'AnnotationDbi', 'limma', 'edgeR','DESeq', 'KEGGgraph', 'e1071', 'gtools', 'gplots', 'RBGL', 'graph', 'igraph', 'lattice'), suppressUpdates=TRUE, suppressAutoUpdate=TRUE)"
