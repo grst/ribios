@@ -1,4 +1,4 @@
-## AUTOMATICALLY GENERATED FROM TEMPLATE (Fri Sep  4 11:39:55 CEST 2015). DO NOT EDIT IT MANUALLY!
+## AUTOMATICALLY GENERATED FROM TEMPLATE (Mon Apr 10 16:08:43 CEST 2017). DO NOT EDIT IT MANUALLY!
 ################################################################################
 ##
 ##  Makefile
@@ -12,7 +12,7 @@
 R=R
 PKG=$(shell awk 'BEGIN{FS=":"}{if ($$1=="Package") {gsub(/ /, "",$$2);print $$2}}' DESCRIPTION)
 PKG_VERSION=$(shell awk 'BEGIN{FS=":"}{if ($$1=="Version") {gsub(/ /, "",$$2);print $$2}}' DESCRIPTION)
-
+LIB_PATH='/pstore/apps/bioinfo/R/3.3'
 
 PKG_ROOT_DIR=`pwd`
 PKG_SRC_DIR=$(PKG_ROOT_DIR)/src
@@ -25,27 +25,9 @@ roxygenise:
 	@(cd ..; ${R} --vanilla -q -e "library(roxygen2);roxygenise(\"$(PKG)\")")
 	@echo ' '
 
-R_CC=`${R} CMD config CC`
-R_CFLAGS=`${R} CMD config CFLAGS`
-R_CPICFLAGS=`${R} CMD config CPICFLAGS`
-R_CPPFLAGS=`${R} CMD config --cppflags`
-R_LDFLAGS=`${R} CMD config --ldflags`
-
-compile:src/*.c
-	@echo '====== Compile source files ======'
-	cd src; for cfile in *.c; do \
-	echo "Compiling $$cfile"; \
-	${R_CC} ${R_CPPFLAGS} ${R_CFLAGS} ${R_CPICFLAGS} -I ../inst/include -c $${cfile}; \
-	done
-	@echo '====== compiling finished ======'
-
-static: compile
-	@echo '====== Compile the static library  ======'
-	@(cd src; ar rcs ../inst/lib/ribiosBase.a *.o)
-
-install: roxygenise static
+install: roxygenise
 	@echo '====== Installing Package ======'
-	@(cd ..; ${R} CMD INSTALL ${PKG})
+	@(cd ..; ${R} CMD INSTALL -l ${LIB_PATH} ${PKG})
 	@echo '====== Installing finished ======'
 	@echo ' '
 

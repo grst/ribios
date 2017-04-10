@@ -1,4 +1,4 @@
-## AUTOMATICALLY GENERATED FROM TEMPLATE (Fri Sep  4 11:39:55 CEST 2015). DO NOT EDIT IT MANUALLY!
+## AUTOMATICALLY GENERATED FROM TEMPLATE (Mon Apr 10 16:08:43 CEST 2017). DO NOT EDIT IT MANUALLY!
 ################################################################################
 ##
 ##  Makefile
@@ -12,7 +12,7 @@
 R=R
 PKG=$(shell awk 'BEGIN{FS=":"}{if ($$1=="Package") {gsub(/ /, "",$$2);print $$2}}' DESCRIPTION)
 PKG_VERSION=$(shell awk 'BEGIN{FS=":"}{if ($$1=="Version") {gsub(/ /, "",$$2);print $$2}}' DESCRIPTION)
-
+LIB_PATH='/pstore/apps/bioinfo/R/3.3'
 
 PKG_ROOT_DIR=`pwd`
 PKG_SRC_DIR=$(PKG_ROOT_DIR)/src
@@ -27,7 +27,7 @@ roxygenise:
 
 install: roxygenise
 	@echo '====== Installing Package ======'
-	@(cd ..; ${R} CMD INSTALL ${PKG})
+	@(cd ..; ${R} CMD INSTALL -l ${LIB_PATH} ${PKG})
 	@echo '====== Installing finished ======'
 	@echo ' '
 
