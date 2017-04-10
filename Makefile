@@ -1,16 +1,20 @@
 R=R
+LIB_PATH='/pstore/apps/bioinfo/R/3.3'
 
-full-install: reqR req install
+full-install: reqs install
 
-install: install-ribiosUtils install-ribiosArg install-ribiosIO install-ribiosDemo install-ribiosAuth install-ribiosUDIS install-ribiosPlot install-ribiosAnnotation install-ribiosCGI install-ribiosExpression install-ribiosMath  install-ribiosPCA install-ribiosReposition install-ribiosSeq install-ribiosNetwork install-ribiosQC install-ribiosGSA install-ribiosGSEA install-ribiosNGS 
+install: install-ribiosUtils install-ribiosArg install-ribiosIO install-ribiosDemo install-ribiosAuth install-ribiosUDIS install-ribiosPlot install-ribiosAnnotation install-ribiosCGI ribiosExpression install-ribiosMath  install-ribiosPCA install-ribiosReposition install-ribiosSeq install-ribiosNetwork install-ribiosQC install-ribiosGSA install-ribiosGSEA install-ribiosNGS 
 
 reqs: reqR reqBioc
 
 reqR:
-	${R} -e "install.packages(c('rrcov'))"
+	${R} -e "install.packages(c('rrcov'), lib=${LIB_PATH})"
 
 reqBioc:
-	${R} -e "library(BiocInstaller); biocLite(c('Biobase', 'AnnotationDbi', 'limma', 'edgeR','DESeq', 'KEGGgraph', 'e1071', 'gtools', 'gplots', 'RBGL', 'graph', 'igraph', 'lattice'), suppressUpdates=TRUE, suppressAutoUpdate=TRUE)"
+	${R} -e "library(BiocInstaller); biocLite(c('Biobase', 'AnnotationDbi', 'limma', 'edgeR','DESeq', 'KEGGgraph', 'e1071', 'gtools', 'gplots', 'RBGL', 'graph', 'igraph', 'lattice'), suppressUpdates=TRUE, suppressAutoUpdate=TRUE, lib=${LIB_PATH})"
+
+install-ribiosBase:ribiosBase
+	cd ribiosBase; make install
 
 install-ribiosUtils:ribiosUtils
 	cd ribiosUtils; make install
